@@ -88,18 +88,14 @@ def training(args):
                             n_head=args.n_head, dim_feedforward=args.dim_feedforward,
                             num_encoder_layer=args.num_encoder_layer, src_max_len=args.src_max_len, 
                             dropout=args.dropout, embedding_dropout=args.embedding_dropout)
-    elif args.model_type == 'T5':
-        model = custom_T5(isPreTrain=args.isPreTrain, variational_mode=args.variational_mode, d_latent=args.d_latent,
-                     emb_src_trg_weight_sharing=args.emb_src_trg_weight_sharing)
-    elif args.model_type == 'bert':
-        model = BertForSequenceClassification.from_pretrained('bert-base-cased', num_labels=2)
+    
     model = model.to(device)
     
     # 2) Optimizer & Learning rate scheduler setting
     optimizer = optimizer_select(model, args)
     scheduler = shceduler_select(optimizer, dataloader_dict, args)
     scaler = GradScaler()
-    #===============================================================================================================================================                    
+    #================================================================수정 필요===============================================================================                    
     criterion = nn.CrossEntropyLoss()
 
     # 3) Model resume
@@ -199,11 +195,11 @@ def training(args):
                 val_acc /= len(dataloader_dict[phase])
                 write_log(logger, 'Validation Loss: %3.3f' % val_loss)
                 write_log(logger, 'Validation Accuracy: %3.2f%%' % (val_acc * 100))
-                save_path = os.path.join(args.model_save_path, args.task, args.data_name, args.tokenizer)
+                save_path = args.model_save_path
                 if not os.path.exists(save_path):
                     os.mkdir(save_path)
                 save_file_name = os.path.join(save_path, 
-                                              f'checkpoint_src_{args.src_vocab_size}_trg_{args.trg_vocab_size}_v_{args.variational_mode}_p_{args.parallel}.pth.tar')
+                                              f'test.pth.tar')
                 if val_acc > best_val_acc:
                     write_log(logger, 'Checkpoint saving...')
                     torch.save({
